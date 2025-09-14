@@ -1,7 +1,3 @@
-// vending_machine.cpp
-// Simplified Vending Machine in C++
-
-// Include necessary libraries
 #include <iostream>   // for input/output
 #include <iomanip>    // for formatting numbers (e.g., setw, setfill)
 #include <vector>     // for using dynamic arrays (vector)
@@ -9,7 +5,6 @@
 #include <sstream>    // for string formatting (toMoney)
 using namespace std;
 
-// Structure representing a vending machine item
 struct Item {
     string code;   // Code used to identify the item (e.g., A1, B2)
     string name;   // Name of the product (e.g., Coca-Cola)
@@ -17,7 +12,6 @@ struct Item {
     int stock;     // Number of items available in stock
 };
 
-// Class representing the vending machine
 class VendingMachine {
     vector<Item> items;  // List of items in the vending machine
 
@@ -94,8 +88,8 @@ public:
         // Dispense the item
         cout << "Dispensing " << it.name << " ... Enjoy!\n";
 
-        // Return change if any
-        cout << "Change returned: " << toMoney(inserted - it.price) << "\n";
+      
+        cout << "Change returned: " << toMoney(inserted - it.price) << "\n";   // Return change if any
     }
 
     // Main loop of the vending machine
@@ -143,3 +137,4 @@ int main() {
     vm.run();           // Run the machine
     return 0;           // End program
 }
+
