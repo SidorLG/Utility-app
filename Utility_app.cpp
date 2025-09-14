@@ -1,110 +1,145 @@
 // vending_machine.cpp
 // Simplified Vending Machine in C++
 
-// Include input/output library for console interaction
-#include <iostream>
-// Include iomanip for output formatting (e.g., setw, setfill)
-#include <iomanip>
-// Include vector for storing list of items
-#include <vector>
-// Include string for handling text
-#include <string>
-using namespace std; // Avoids writing std:: repeatedly
+// Include necessary libraries
+#include <iostream>   // for input/output
+#include <iomanip>    // for formatting numbers (e.g., setw, setfill)
+#include <vector>     // for using dynamic arrays (vector)
+#include <string>     // for using string type
+#include <sstream>    // for string formatting (toMoney)
+using namespace std;
 
-// Define a structure to represent an item in the vending machine
+// Structure representing a vending machine item
 struct Item {
-    string code, name; // Unique code and item name
-    int price;         // Item price in cents
-    int stock;         // Number of items available
+    string code;   // Code used to identify the item (e.g., A1, B2)
+    string name;   // Name of the product (e.g., Coca-Cola)
+    int price;     // Price in cents (to avoid floating-point errors)
+    int stock;     // Number of items available in stock
 };
 
-// VendingMachine class definition
+// Class representing the vending machine
 class VendingMachine {
-    vector<Item> items; // Vector to hold all vending machine items
+    vector<Item> items;  // List of items in the vending machine
 
-    // Convert price in cents into a money string (e.g., £1.25)
+    // Helper function to convert cents into a formatted money string
     string toMoney(int cents) {
-        ostringstream ss; // String stream for formatting
-        ss << "£" << cents/100               // Convert cents to pounds
-           << "." << setw(2) << setfill('0') // Always show 2 decimal places
-           << (cents%100);                   // Remainder as pence
-        return ss.str(); // Return formatted string
+        ostringstream ss;  // Create a string stream for formatting
+        ss << "£" << cents/100 << "."       // Pounds (integer part)
+           << setw(2) << setfill('0')       // Always 2 digits after decimal
+           << (cents % 100);                // Cents (remainder)
+        return ss.str();  // Return formatted money string
     }
 
 public:
-    // Constructor: initializes vending machine with default items
+    // Constructor: initialize vending machine with some default items
     VendingMachine() {
         items = {
-            {"A1", "Coca-Cola", 125, 5},       // Code A1, £1.25, stock 5
-            {"A2", "Water", 100, 5},           // Code A2, £1.00, stock 5
-            {"B1", "Coffee", 150, 3},          // Code B1, £1.50, stock 3
-            {"B2", "Hot Chocolate", 170, 2},   // Code B2, £1.70, stock 2
-            {"C1", "Chocolate Bar", 85, 4},    // Code C1, £0.85, stock 4
-            {"C2", "Crisps", 95, 4}            // Code C2, £0.95, stock 4
+            {"A1", "Coca-Cola", 125, 5},
+            {"A2", "Water", 100, 5},
+            {"B1", "Coffee", 150, 3},
+            {"B2", "Hot Chocolate", 170, 2},
+            {"C1", "Chocolate Bar", 85, 4},
+            {"C2", "Crisps", 95, 4}
         };
     }
 
-    // Display the vending machine menu
+    // Function to display the vending machine menu
     void showMenu() {
         cout << "\n--- Vending Machine Menu ---\n";
-        for (auto &it : items) // Loop through all items
-            cout << it.code << " | " << setw(15) << left << it.name // Code and name
-                 << " | " << toMoney(it.price)                      // Price formatted
-                 << " | Stock: " << it.stock << "\n";               // Stock left
+        for (auto &it : items)  // Loop through all items
+            cout << it.code << " | " << setw(15) << left << it.name
+                 << " | " << toMoney(it.price)
+                 << " | Stock: " << it.stock << "\n";
     }
 
-    // Find an item by its code, return pointer if found, else nullptr
+    // Function to find an item by its code
     Item* findItem(string code) {
-        for (auto &it : items) // Loop through items
-            if (it.code == code) return &it; // Match found
-        return nullptr; // No match found
+        for (auto &it : items) {
+            if (it.code == code) return &it;  // Return pointer if match found
+        }
+        return nullptr;  // Return nullptr if not found
     }
 
-    // Handle buying an item
+    // Function to handle purchasing an item
     void buyItem(Item &it) {
-        if (it.stock <= 0) { // Check if item is out of stock
+        // Check if the item is out of stock
+        if (it.stock <= 0) {
             cout << "Sorry, " << it.name << " is out of stock.\n";
-            return; // Exit function
+            return;
         }
-        int inserted = 0; // Track money inserted (in cents)
+
+        int inserted = 0;  // Track amount of money inserted (in cents)
         cout << "Price of " << it.name << ": " << toMoney(it.price) << "\n";
-        
+
         // Keep asking for money until enough is inserted
         while (inserted < it.price) {
             cout << "Insert money (e.g., 1.00) or type 0 to cancel: ";
-            double val; cin >> val; // Read money inserted
-            if (val == 0) { // Cancel transaction
+            double val; 
+            cin >> val;
+
+            // If user enters 0, cancel transaction
+            if (val == 0) {
                 cout << "Transaction cancelled. Returning " << toMoney(inserted) << "\n";
                 return;
             }
-            inserted += int(val*100 + 0.5); // Convert pounds to cents, rounding
+
+            // Convert entered value into cents and add to total
+            inserted += int(val * 100 + 0.5);
             cout << "Total inserted: " << toMoney(inserted) << "\n";
         }
-        
-        // Item purchased successfully
-        it.stock--; // Reduce stock by 1
+
+        // Reduce stock since item is purchased
+        it.stock--;
+
+        // Dispense the item
         cout << "Dispensing " << it.name << " ... Enjoy!\n";
-        cout << "Change returned: " << toMoney(inserted - it.price) << "\n"; // Return change
+
+        // Return change if any
+        cout << "Change returned: " << toMoney(inserted - it.price) << "\n";
     }
 
-    // Main loop for running the vending machine
+    // Main loop of the vending machine
     void run() {
-        while (true) { // Infinite loop until quit
-            showMenu(); // Show available items
+        while (true) {
+            // Show the menu
+            showMenu();
+
+            // Ask user for input
             cout << "\nEnter item code (or Q to quit): ";
-            string code; cin >> code; // Get user input
-            if (code == "Q" || code == "q") break; // Quit program if user enters Q
-            Item* choice = findItem(code); // Try to find item by code
-            if (!choice) cout << "Invalid code.\n"; // If not found
-            else buyItem(*choice); // Otherwise, process purchase
+            string code; 
+            cin >> code;
+
+            // Quit if user enters Q
+            if (code == "Q" || code == "q") break;
+
+            // Try to find the item
+            Item* choice = findItem(code);
+
+            // If invalid code, show error
+            if (!choice) {
+                cout << "Invalid code.\n";
+            } else {
+                // Process buying the item
+                buyItem(*choice);
+
+                // After purchase, ask if user wants another product
+                cout << "Would you like another product to buy? (Y/N): ";
+                char again; 
+                cin >> again;
+
+                // If user enters N, break loop
+                if (again == 'N' || again == 'n') break;
+            }
         }
-        cout << "Thank you. Goodbye!\n"; // End message
+
+        // Exit message
+        cout << "Thank you. Goodbye!\n";
     }
 };
 
-// Main program entry point
+// Main function: entry point of the program
 int main() {
-    VendingMachine vm; // Create a vending machine object
-    vm.run();          // Run the vending machine
-    return 0;          // That is the end of program 
-
+    VendingMachine vm;  // Create a vending machine object
+    vm.run();           // Run the machine
+    return 0;           // End program
+}
